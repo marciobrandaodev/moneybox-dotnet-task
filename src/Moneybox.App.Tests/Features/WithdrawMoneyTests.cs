@@ -33,7 +33,6 @@ public class WithdrawMoneyTests
             .With(a => a.User, _fixture.Build<User>().With(u => u.Email, "from@mail.com").Create())
             .With(a => a.Balance, 1000m)
             .With(a => a.Withdrawn, 0m)
-            .With(a => a.PaidIn, 0m)
             .Create();
     }
 
