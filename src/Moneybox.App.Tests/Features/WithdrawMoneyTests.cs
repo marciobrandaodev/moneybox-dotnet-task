@@ -70,4 +70,22 @@ public class WithdrawMoneyTests
         _notificationServiceMock.Verify(
             n => n.NotifyFundsLow(_fromAccount.User.Email), Times.Once);
     }
+
+    [Test]
+    public void Execute_NonExistentAccount_ThrowsInvalidOperation()
+    {
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_fromAccount.Id)).Returns((Account)null);
+        
+        Assert.Throws<InvalidOperationException>(() =>
+            _withdrawMoney.Execute(_fromAccount.Id, 200m));
+    }
+
+    [Test]
+    public void ExecuteNegativeAmount_ThrowsInvalidOperation()
+    {
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_fromAccount.Id)).Returns(_fromAccount);
+        
+        Assert.Throws<InvalidOperationException>(() =>
+            _withdrawMoney.Execute(_fromAccount.Id, -100m));
+    }
 }

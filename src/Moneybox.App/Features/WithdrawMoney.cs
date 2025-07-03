@@ -17,23 +17,26 @@ namespace Moneybox.App.Features
 
         public void Execute(Guid fromAccountId, decimal amount)
         {
-            var from = this.accountRepository.GetAccountById(fromAccountId);
-
-            var fromBalance = from.Balance - amount;
-            if (fromBalance < 0m)
+            if(amount <= 0)
             {
-                throw new InvalidOperationException("Insufficient funds to Withdraw");
+                throw new InvalidOperationException("Withdrawal amount must be positive");
             }
 
-            if (fromBalance < 500m)
+            var from = this.accountRepository.GetAccountById(fromAccountId);
+
+            if (from == null) 
+            {
+                throw new InvalidOperationException("Account not found");
+            }
+
+            from.Withdraw(amount);
+
+            this.accountRepository.Update(from);
+
+            if (from.Balance < 500m)
             {
                 this.notificationService.NotifyFundsLow(from.User.Email);
             }
-
-            from.Balance = fromBalance;
-            from.Withdrawn -= amount;
-
-            this.accountRepository.Update(from);
         }
     }
 }

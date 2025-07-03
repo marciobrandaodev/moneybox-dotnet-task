@@ -110,4 +110,38 @@ public class TransferMoneyTests
         _notificationServiceMock.Verify(
             n => n.NotifyApproachingPayInLimit(_toAccount.User.Email), Times.Once);
     }
+
+    [Test]
+    public void Execute_FromAccountNotFound_ThrowsInvalidOperationException()
+    {
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_fromAccount.Id)).Returns((Account)null);
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_toAccount.Id)).Returns(_toAccount);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            _transferMoney.Execute(_fromAccount.Id, _toAccount.Id, 200m));
+    }
+
+    [Test]
+    public void Execute_ToAccountNotFound_ThrowsInvalidOperationException()
+    {
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_fromAccount.Id)).Returns(_fromAccount);
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_toAccount.Id)).Returns((Account)null);
+        
+        Assert.Throws<InvalidOperationException>(() =>
+            _transferMoney.Execute(_fromAccount.Id, _toAccount.Id, 200m));
+    }
+
+    [Test]
+    public void Execute_ZeroOrNegativeAmount_ThrowsInvalidOperationException()
+    {
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_fromAccount.Id)).Returns(_fromAccount);
+        _accountRepositoryMock.Setup(r => r.GetAccountById(_toAccount.Id)).Returns(_toAccount);
+        
+        Assert.Throws<InvalidOperationException>(() =>
+            _transferMoney.Execute(_fromAccount.Id, _toAccount.Id, 0m));
+        
+        Assert.Throws<InvalidOperationException>(() =>
+            _transferMoney.Execute(_fromAccount.Id, _toAccount.Id, -100m));
+    }
+
 }
